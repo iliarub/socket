@@ -23,10 +23,7 @@
 
 void* to_serv(void* ptr)
 {
-	int* port;
-	port=(int*)ptr;
 	char buff[255];
-	sprintf(buff, "%d", *port);
 	struct sockaddr_in serv, client;
 	serv.sin_family=AF_INET;
 	serv.sin_port=htons(1455);
@@ -35,28 +32,16 @@ void* to_serv(void* ptr)
 
 	fd= socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	while(connect(fd, (struct sockaddr*)&serv, sizeof(serv))==-1);
-	send(fd, (char*)&buff, 255, 0);
-
-	//close(fd);
-
-	client.sin_family=AF_INET;
-	client.sin_port=htons(*port);
-	client.sin_addr.s_addr=inet_addr("127.0.0.1");
-	bind(fd, (struct sockaddr*)&client, sizeof(client));
-	listen(fd, 5);
-	int size = sizeof(struct sockaddr_in);
-	while((fd_client = accept(fd, (struct sockaddr*)&client, &size))==-1);
-	recv(fd_client, buff, 255, 0);
-	printf("%d) %s\n", *port ,buff);
+	recv(fd, buff, 255, 0);
+	printf("%s\n",buff);
 	close(fd);
-	close(fd_client);
 }
 
 
 
 int main(void )
 {
-	int MAX=1;
+	int MAX=10;
 	int tmp[MAX];
 	pthread_t tid[MAX];
 	for(int i=0; i<MAX; i++)

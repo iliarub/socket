@@ -40,7 +40,7 @@ int main()
 	int i=0;
 	while(i==0)
 	{
-		if(recv(fd, buff2, 255, 0)==-1)
+		if(recvfrom(fd, buff2, 50, 0)==-1)
 		perror("recv");
 		memcpy(udph2, buff2+20, sizeof(struct udphdr));
 		if(htons(123)==udph2->uh_dport) i++;

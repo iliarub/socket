@@ -11,23 +11,26 @@
 int main()
 {
 	char buff[50]={0};
-	char buff2[50]={0};
-	struct sockaddr_in serv;
+	char buff2[400]={0};
+	struct sockaddr_in serv, client;
 	serv.sin_family=AF_INET;
 	serv.sin_port=htons(1455);
 	serv.sin_addr.s_addr=inet_addr("127.0.0.1");
+	client.sin_family=AF_INET;
+	client.sin_port=htons(123);
+	client.sin_addr.s_addr=inet_addr("127.0.0.1");
 
 	int fd;
 	if((fd= socket(AF_INET, SOCK_RAW, IPPROTO_UDP))==-1)
 		perror("create socket");
-	if(bind(fd, (struct sockaddr*)&serv, sizeof(serv))==-1)
+	if(bind(fd, (struct sockaddr*)&client, sizeof(client))==-1)
 		perror("bind");
 
 
-	struct ip *iph;
-	struct udphdr *udph, *udph2;
-	udph->uh_sport=htons(1455);		/* source port */
-	udph->uh_dport=htons(123);		/* destination port */
+	struct ip iph;
+	struct udphdr *udph, udph2;
+	udph->uh_sport=htons(123);		/* source port */
+	udph->uh_dport=htons(1455);		/* destination port */
 	udph->uh_ulen=htons(14);				/* udp length */
 	udph->uh_sum=htons(0);
 
@@ -38,16 +41,18 @@ int main()
 	if(sendto(fd, buff, sizeof(buff), 0, (struct sockaddr*)&serv, sizeof(serv))==-1)
 		perror("send");
 	int i=0;
+	int size = sizeof(client);
 	while(i==0)
 	{
-		if(recvfrom(fd, buff2, 50, 0)==-1)
+		int len;
+		if((len =recvfrom(fd, buff2, 400, 0, (struct sockaddr*)&serv, &size))==-1)
 		perror("recv");
-		memcpy(udph2, buff2+20, sizeof(struct udphdr));
-		if(htons(123)==udph2->uh_dport) i++;
+
+		memcpy(&iph, buff2, sizeof(struct ip));
+		memcpy(&udph2, buff2+sizeof(struct ip), sizeof(struct udphdr));
+		if(htons(123)==udph2.uh_dport) i++;
 	}
 
-	printf("%s\n", buff);
-	scanf("%s", buff);
-	send(fd, buff, 255, 0);
+	printf("%s\n", buff2+28);
 	return 1;
 }

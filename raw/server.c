@@ -21,10 +21,12 @@ int main()
 	fd= socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	bind(fd, (struct sockaddr*)&serv, sizeof(serv));
 	listen(fd, 5);
-	recvfrom(fd, tmp, 255, 0,(struct sockaddr*)&client , &size);
-	printf("%s\n", tmp);
-	sendto(fd, buff, 255, 0,(struct sockaddr*) &client, sizeof(client));
-
+	while(1)
+	{
+		recvfrom(fd, tmp, 255, 0,(struct sockaddr*)&client , &size);
+		printf("%s\n", tmp);
+		sendto(fd, buff, 255, 0,(struct sockaddr*) &client, sizeof(client));
+	}
 	close(fd_client);
 	close(fd);
 	return 1;
